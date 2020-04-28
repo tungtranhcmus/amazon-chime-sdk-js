@@ -89,7 +89,7 @@ function spawnOrFail(command, args, options) {
     console.log(`Command ${command} failed with ${cmd.error.code}`);
     process.exit(255);
   }
-  const output=cmd.output.toString();
+  const output = cmd.stdout.toString();
   console.log(output);
   if (cmd.status !== 0) {
     console.log(`Command ${command} failed with exit code ${cmd.status} signal ${cmd.signal}`);
@@ -116,6 +116,7 @@ function ensureApp(appName) {
 
   // TODO: remove this once AWS Lambda Node.js runtime includes the Chime APIs
   spawnOrFail('npm', ['install', '--production'], {cwd: path.join(__dirname, '..', 'browser', 'node_modules', 'aws-sdk')});
+  spawnOrFail('npm', ['install', '--production'], {cwd: path.join(__dirname, '..', 'browser', 'node_modules', 'uuid')});
 }
 
 function ensureTools() {
@@ -137,6 +138,8 @@ if (!fs.existsSync('build')) {
 console.log(`Using region ${region}, bucket ${bucket}, stack ${stack}`);
 ensureBucket();
 
+fs.copySync(path.join(__dirname, '..', 'browser', 'node_modules', 'aws-sdk'), 'src');
+fs.copySync(path.join(__dirname, '..', 'browser', 'node_modules', 'uuid'), 'src');
 fs.copySync(appHtml(app), 'src/index.html');
 if (app === 'meeting') {
   fs.copySync(appHtml('meetingV2'), 'src/indexV2.html');
